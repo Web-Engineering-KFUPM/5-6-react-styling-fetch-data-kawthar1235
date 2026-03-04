@@ -202,41 +202,33 @@ export default function App() {
      ---------------------------------------------------------
      Implement fetch logic inside this useEffect.
      ========================================================= */
-useEffect(() => {
-  const fetchUsers = async () => {
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setLoading(true);
+      setError(null);
 
-    setLoading(true)
-    setError(null)
+      try {
+        const response = await fetch(
+          "https://jsonplaceholder.typicode.com/users"
+        );
 
-    try {
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
 
-      const response = await fetch(
-        "https://jsonplaceholder.typicode.com/users"
-      )
+        const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch users")
+        setUsers(data);
+        setFilteredUsers(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const data = await response.json()
-
-      setUsers(data)
-      setFilteredUsers(data)
-
-    } catch (err) {
-
-      setError(err.message)
-
-    } finally {
-
-      setLoading(false)
-
-    }
-  }
-
-  fetchUsers()
-
-}, [])
+    fetchUsers();
+  }, []);
 
   /* =========================================================
      TODO 2.2 — FILTER USERS BY NAME
@@ -245,25 +237,16 @@ useEffect(() => {
      Implement filtering logic inside this useEffect.
      Dependency array MUST be: [searchTerm, users]
      ========================================================= */
-useEffect(() => {
-
-  if (!searchTerm) {
-
-    setFilteredUsers(users)
-
-  } else {
-
-    const filtered = users.filter(user =>
-      user.name.toLowerCase().includes(
-        searchTerm.toLowerCase()
-      )
-    )
-
-    setFilteredUsers(filtered)
-
-  }
-
-}, [searchTerm, users])
+  useEffect(() => {
+    if (!searchTerm) {
+      setFilteredUsers(users);
+    } else {
+      const filtered = users.filter((user) =>
+        user.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredUsers(filtered);
+    }
+  }, [searchTerm, users]);
 
   // Modal handlers (already complete)
   function handleUserClick(user) {
@@ -298,7 +281,11 @@ useEffect(() => {
           <UserList users={filteredUsers} onUserClick={handleUserClick} />
         )}
 
-        <UserModal show={showModal} user={selectedUser} onHide={handleCloseModal} />
+        <UserModal
+          show={showModal}
+          user={selectedUser}
+          onHide={handleCloseModal}
+        />
       </Container>
 
       {/* TODO 1.1: Set footer className EXACTLY as in lab instructions */}
